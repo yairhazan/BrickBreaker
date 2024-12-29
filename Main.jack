@@ -1,0 +1,36 @@
+/**
+ * A Brick Breaker game implementation in Jack.
+ * The game features a paddle that the player controls to bounce a ball
+ * and break bricks. The goal is to break all bricks without letting the
+ * ball fall below the paddle.
+ * 
+ * Controls:
+ * - Left Arrow: Move paddle left
+ * - Right Arrow: Move paddle right
+ * - Q: Quit game
+ * 
+ * Game Elements:
+ * - Paddle: Player-controlled platform
+ * - Ball: Bounces off walls, paddle, and bricks
+ * - Bricks: Targets to be destroyed
+ * 
+ * Implementation Details:
+ * - Uses the Jack OS Screen class for graphics
+ * - Implements collision detection
+ * - Features smooth animation using Sys.wait
+ */
+class Main {
+    /** Entry point of the game */
+    function void main() {
+        var Game game;
+        
+        // Create and start a new game
+        let game = Game.new();
+        do game.start();
+        
+        // Clean up when game is over
+        do game.dispose();
+        
+        return;
+    }
+} 

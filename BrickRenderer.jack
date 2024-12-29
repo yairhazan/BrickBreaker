@@ -1,0 +1,60 @@
+class BrickRenderer {
+    /** Draws the paddle */
+    function void drawPaddle(int x, int y, int width, int height) {
+        do Screen.setColor(true);
+        do Screen.drawRectangle(x, y, x + width - 1, y + height - 1);
+        return;
+    }
+    
+    /** Draws the ball */
+    function void drawBall(int x, int y, int radius) {
+        do Screen.setColor(true);
+        do Screen.drawCircle(x, y, radius);
+        return;
+    }
+    
+    /** Draws a brick with damage pattern based on health percentage */
+    function void drawBrick(int x, int y, int width, int height, int health, int maxHealth) {
+        var int damageLevel;
+        
+        // Draw the basic brick outline
+        do Screen.setColor(true);
+        do Screen.drawRectangle(x, y, x + width - 1, y + height - 1);
+        
+        // Calculate damage level (0 to 4, where 4 is most damaged)
+        let damageLevel = maxHealth - health;
+        
+        // Draw damage patterns based on damage level
+        do Screen.setColor(false);
+        
+        if (damageLevel > 0) {
+            // First level of damage: diagonal line from top-left
+            do Screen.drawLine(x + 2, y + 2, x + 8, y + 8);
+        }
+        if (damageLevel > 1) {
+            // Second level: diagonal line from top-right
+            do Screen.drawLine(x + width - 2, y + 2, x + width - 8, y + 8);
+        }
+        if (damageLevel > 2) {
+            // Third level: X pattern in the middle
+            do Screen.drawLine(x + (width/2) - 5, y + (height/2) - 5, 
+                             x + (width/2) + 5, y + (height/2) + 5);
+            do Screen.drawLine(x + (width/2) - 5, y + (height/2) + 5,
+                             x + (width/2) + 5, y + (height/2) - 5);
+        }
+        if (damageLevel > 3) {
+            // Fourth level: horizontal line through middle
+            do Screen.drawLine(x + 2, y + (height/2), 
+                             x + width - 2, y + (height/2));
+        }
+        
+        return;
+    }
+    
+    /** Displays text on screen */
+    function void displayText(String message, int x, int y) {
+        do Output.moveCursor(y, x);
+        do Output.printString(message);
+        return;
+    }
+} 

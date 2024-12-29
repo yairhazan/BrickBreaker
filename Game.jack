@@ -1,0 +1,300 @@
+class Game {
+    field Ball ball;           // The game ball
+    field Paddle paddle;       // The paddle
+    field Array bricks;        // Array of bricks
+    field int numBricks;       // Size of bricks array
+    field boolean exit;        // Game exit flag
+    field boolean gameOver;    // Game over state
+    field int score;          // Current score
+    field int level;          // Current level
+    field int bricksLeft;     // Number of bricks remaining
+    
+    /** Constructs a new Game */
+    constructor Game new() {
+        let exit = false;
+        let gameOver = false;
+        let score = 0;
+        let level = 1;
+        do init();
+        return this;
+    }
+    
+    /** Initializes the game state */
+    method void init() {
+        var int paddleWidth, paddleHeight;
+        var int i, brickX, brickY, brickWidth, brickHeight;
+        var int health;
+        
+        let paddleWidth = 50;
+        let paddleHeight = 10;
+        
+        // Create ball at center of screen
+        let ball = Ball.new(256/2, 180, 2, -2);
+        
+        // Create paddle
+        let paddle = Paddle.new((512 - paddleWidth)/2, 200, paddleWidth, paddleHeight);
+        
+        // Initialize bricks based on level
+        let brickWidth = 40;
+        let brickHeight = 15;
+        
+        if (level = 1) {
+            let numBricks = 3;
+            let bricks = Array.new(numBricks);
+            let brickY = 50;
+            
+            // Create 3 bricks in the middle
+            let i = 0;
+            while (i < numBricks) {
+                let brickX = 206 + (i * (brickWidth + 10));  // Center the bricks
+                let bricks[i] = Brick.new(brickX, brickY, brickWidth, brickHeight, 1);
+                let i = i + 1;
+            }
+        }
+        else {
+            let numBricks = level * 5;  // More bricks each level
+            let bricks = Array.new(numBricks);
+            let brickY = 30;
+            let i = 0;
+            
+            while (i < numBricks) {
+                let brickX = 50 + ((i * (brickWidth + 5)) - (((i/8) * 8) * (brickWidth + 5)));
+                let brickY = 30 + ((i/8) * (brickHeight + 5));
+                let health = (i - ((i/5) * 5)) + 1;  // Health 1-5 repeating
+                let bricks[i] = Brick.new(brickX, brickY, brickWidth, brickHeight, health);
+                let i = i + 1;
+            }
+        }
+        
+        let bricksLeft = numBricks;
+        let gameOver = false;
+        
+        return;
+    }
+    
+    /** Starts the main game loop */
+    method void start() {
+        var char key;
+        var char lastKey;
+        var boolean firstGameOver;
+        
+        let firstGameOver = true;
+        
+        while (~exit) {
+            let lastKey = key;
+            let key = Keyboard.keyPressed();
+            
+            if (gameOver) {
+                if (firstGameOver) {
+                    do Screen.clearScreen();
+                    do Output.moveCursor(10,27);
+                    do Output.printString("Game Over!");
+                    do Output.moveCursor(12,27);
+                    do Output.printString("Score: ");
+                    do Output.printInt(score);
+                    do Output.moveCursor(14,27);
+                    do Output.printString("Press SPACE to play again");
+                    do Output.moveCursor(15,27);
+                    do Output.printString("Press Q to quit");
+                    let firstGameOver = false;
+                }
+                
+                if (key = 81) { let exit = true; }  // Q key
+                if (key = 32) {                     // Space key
+                    do reset();
+                    let firstGameOver = true;
+                }
+            }
+            else {
+                if (key = 81) { let exit = true; }  // Q key
+                
+                // Handle continuous movement
+                if ((key = 130) | (lastKey = 130)) { do paddle.moveLeft(); }
+                if ((key = 132) | (lastKey = 132)) { do paddle.moveRight(); }
+                
+                if (~gameOver) {
+                    do update();
+                    do Screen.clearScreen();
+                    do render();
+                }
+            }
+            
+            do Sys.wait(5);
+        }
+        
+        return;
+    }
+    
+    /** Updates game state */
+    method void update() {
+        var int r, ballY, ballX, i, hitPoint;
+        var Brick brick;
+        var boolean hitBrick;
+        
+        if (ball.isOutOfBounds()) {
+            let gameOver = true;
+            return;
+        }
+        
+        // Check if level is complete
+        if (bricksLeft = 0) {
+            let level = level + 1;
+            do reset();
+            return;
+        }
+        
+        let r = ball.getRadius();
+        let ballY = ball.getY();
+        
+        // Check top collision first
+        if (ballY < (r + 1)) {
+            do ball.setY(r + 1);
+            do ball.bounce(true);
+        }
+        
+        // Move ball after handling top collision
+        do ball.move();
+        
+        // Side wall collisions
+        if (ball.getX() < (r + 1)) {
+            do ball.bounce(false);
+            do ball.setX(r + 1);
+        }
+        if (ball.getX() > (510 - r)) {
+            do ball.bounce(false);
+            do ball.setX(510 - r);
+        }
+        
+        // Paddle collision with angle calculation
+        if (ball.checkCollision(paddle.getX(), paddle.getY(),
+            paddle.getX() + paddle.getWidth(),
+            paddle.getY() + paddle.getHeight())) {
+            
+            // Calculate where on the paddle the ball hit
+            let hitPoint = ball.getX() - paddle.getX();
+            
+            // Divide paddle into three sections
+            if (hitPoint < (paddle.getWidth() / 3)) {
+                // Left third - bounce left
+                do ball.setVelocity(-3, -2);
+            }
+            else {
+                if (hitPoint > ((paddle.getWidth() * 2) / 3)) {
+                    // Right third - bounce right
+                    do ball.setVelocity(3, -2);
+                }
+                else {
+                    // Middle third - normal bounce
+                    do ball.setVelocity(2, -2);
+                }
+            }
+            
+            // Move ball above paddle to prevent multiple collisions
+            do ball.setY(paddle.getY() - r - 1);
+        }
+        
+        // Check brick collisions with side detection
+        let i = 0;
+        let hitBrick = false;
+        while (i < numBricks) {
+            let brick = bricks[i];
+            if (brick.getVisibility()) {
+                let ballX = ball.getX();
+                let ballY = ball.getY();
+                
+                if (ball.checkCollision(brick.getX(), brick.getY(),
+                                      brick.getX() + brick.getWidth(),
+                                      brick.getY() + brick.getHeight())) {
+                    
+                    if ((ballX < brick.getX()) | ((ballX > (brick.getX() + brick.getWidth())))) {
+                        do ball.bounce(false);
+                    }
+                    else {
+                        do ball.bounce(true);
+                    }
+                    
+                    if (brick.hit()) {  // Returns true if brick is destroyed
+                        let bricksLeft = bricksLeft - 1;
+                        let score = score + (level * 10);
+                    }
+                    let hitBrick = true;
+                }
+            }
+            let i = i + 1;
+        }
+        
+        return;
+    }
+    
+    /** Renders the game state */
+    method void render() {
+        var int i;
+        var Brick brick;
+        
+        if (~gameOver) {
+            // Draw bricks
+            let i = 0;
+            while (i < numBricks) {
+                let brick = bricks[i];
+                if (brick.getVisibility()) {
+                    do BrickRenderer.drawBrick(
+                        brick.getX(), 
+                        brick.getY(),
+                        brick.getWidth(),
+                        brick.getHeight(),
+                        brick.getHealth(),
+                        brick.getMaxHealth()
+                    );
+                }
+                let i = i + 1;
+            }
+            
+            // Draw ball and paddle
+            do BrickRenderer.drawBall(ball.getX(), ball.getY(), ball.getRadius());
+            do BrickRenderer.drawPaddle(
+                paddle.getX(), 
+                paddle.getY(),
+                paddle.getWidth(),
+                paddle.getHeight()
+            );
+        }
+        return;
+    }
+    
+    /** Resets the game state */
+    method void reset() {
+        if (~(ball = null)) { do ball.dispose(); }
+        if (~(paddle = null)) { do paddle.dispose(); }
+        do disposeBricks();
+        do init();
+        return;
+    }
+    
+    /** Disposes the game */
+    method void dispose() {
+        if (~(ball = null)) { do ball.dispose(); }
+        if (~(paddle = null)) { do paddle.dispose(); }
+        do disposeBricks();
+        do Memory.deAlloc(this);
+        return;
+    }
+    
+    /** Disposes bricks array */
+    method void disposeBricks() {
+        var int i;
+        var Brick brick;
+        
+        if (~(bricks = null)) {
+            let i = 0;
+            while (i < numBricks) {
+                let brick = bricks[i];
+                if (~(brick = null)) {
+                    do brick.dispose();
+                }
+                let i = i + 1;
+            }
+            do bricks.dispose();
+        }
+        return;
+    }
+} 

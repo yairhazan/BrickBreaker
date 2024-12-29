@@ -1,0 +1,96 @@
+class Ball {
+    field int x, y;        // Current position
+    field int dx, dy;      // Velocity
+    field int radius;      // Ball radius
+    
+    /** Constructs a new Ball instance */
+    constructor Ball new(int startX, int startY, int startDx, int startDy) {
+        let x = startX;
+        let y = startY;
+        let dx = startDx;
+        let dy = startDy;
+        let radius = 4;
+        return this;
+    }
+    
+    /** Moves the ball according to its velocity */
+    method void move() {
+        var int nextX, nextY;
+        let nextX = x + dx;
+        let nextY = y + dy;
+        
+        // Boundary checks
+        if (nextX < radius) { let nextX = radius; }
+        if (nextX > (511 - radius)) { let nextX = 511 - radius; }
+        if (nextY < radius) { let nextY = radius; }
+        
+        let x = nextX;
+        let y = nextY;
+        return;
+    }
+    
+    /** Bounces the ball - changes direction based on collision */
+    method void bounce(boolean isVertical) {
+        if (isVertical) {
+            let dy = -dy;
+        }
+        else {
+            let dx = -dx;
+        }
+        return;
+    }
+    
+    /** Sets the ball's x position */
+    method void setX(int newX) {
+        let x = newX;
+        return;
+    }
+    
+    /** Sets the ball's y position */
+    method void setY(int newY) {
+        let y = newY;
+        return;
+    }
+    
+    /** Checks if ball collides with a rectangle */
+    method boolean checkCollision(int x1, int y1, int x2, int y2) {
+        if ((x + radius) < x1) { return false; }
+        if ((x - radius) > x2) { return false; }
+        if ((y + radius) < y1) { return false; }
+        if ((y - radius) > y2) { return false; }
+        return true;
+    }
+    
+    /** Checks if ball is below screen */
+    method boolean isOutOfBounds() {
+        return (y > 240);  // Changed from 254 to give more margin
+    }
+    
+    /** Gets x position */
+    method int getX() { return x; }
+    
+    /** Gets y position */
+    method int getY() { return y; }
+    
+    /** Gets radius */
+    method int getRadius() { return radius; }
+    
+    /** Disposes this ball */
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+    
+    /** Sets the ball's velocity */
+    method void setVelocity(int newDx, int newDy) {
+        let dx = newDx;
+        let dy = newDy;
+        return;
+    }
+    
+    /** Gets horizontal velocity */
+    method int getDx() { return dx; }
+    
+    /** Gets vertical velocity */
+    method int getDy() { return dy; }
+} 

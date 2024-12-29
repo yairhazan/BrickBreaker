@@ -1,0 +1,56 @@
+class Brick {
+    field int x, y;           // Position
+    field int width, height;  // Dimensions
+    field int health;        // Current health
+    field int maxHealth;     // Maximum health
+    field boolean isVisible;  // Visibility state
+    
+    /** Constructs a new brick */
+    constructor Brick new(int startX, int startY, int brickWidth, int brickHeight, int startHealth) {
+        let x = startX;
+        let y = startY;
+        let width = brickWidth;
+        let height = brickHeight;
+        let health = startHealth;
+        let maxHealth = startHealth;  // Store initial health as max health
+        let isVisible = true;
+        return this;
+    }
+    
+    /** Hit the brick and return true if destroyed */
+    method boolean hit() {
+        let health = health - 1;
+        if (health < 1) {
+            let isVisible = false;
+            return true;
+        }
+        return false;
+    }
+    
+    /** Gets health */
+    method int getHealth() { return health; }
+    
+    /** Gets visibility state */
+    method boolean getVisibility() { return isVisible; }
+    
+    /** Gets x position */
+    method int getX() { return x; }
+    
+    /** Gets y position */
+    method int getY() { return y; }
+    
+    /** Gets width */
+    method int getWidth() { return width; }
+    
+    /** Gets height */
+    method int getHeight() { return height; }
+    
+    /** Gets max health */
+    method int getMaxHealth() { return maxHealth; }
+    
+    /** Disposes this brick */
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+} 

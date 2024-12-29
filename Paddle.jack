@@ -1,0 +1,55 @@
+class Paddle {
+    field int x, y;           // Position
+    field int width, height;  // Dimensions
+    field int speed;         // Movement speed
+    
+    /** Constructs a new paddle */
+    constructor Paddle new(int startX, int startY, int paddleWidth, int paddleHeight) {
+        let x = startX;
+        let y = startY;
+        let width = paddleWidth;
+        let height = paddleHeight;
+        let speed = 8;
+        return this;
+    }
+    
+    /** Moves the paddle left */
+    method void moveLeft() {
+        if (x > speed) {
+            let x = x - speed;
+        }
+        else {
+            let x = 0;
+        }
+        return;
+    }
+    
+    /** Moves the paddle right */
+    method void moveRight() {
+        if ((x + width + speed) < 512) {
+            let x = x + speed;
+        }
+        else {
+            let x = 512 - width;
+        }
+        return;
+    }
+    
+    /** Gets x position */
+    method int getX() { return x; }
+    
+    /** Gets y position */
+    method int getY() { return y; }
+    
+    /** Gets width */
+    method int getWidth() { return width; }
+    
+    /** Gets height */
+    method int getHeight() { return height; }
+    
+    /** Disposes this paddle */
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+} 

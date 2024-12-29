@@ -1,0 +1,29 @@
+class Screen {
+    /** Draws the paddle */
+    function void drawPaddle(int x, int y, int width, int height) {
+        do Screen.setColor(true);
+        do Screen.drawRectangle(x, y, x + width, y + height);
+        return;
+    }
+    
+    /** Draws the ball */
+    function void drawBall(int x, int y, int radius) {
+        do Screen.setColor(true);
+        do Screen.drawCircle(x, y, radius);
+        return;
+    }
+    
+    /** Draws a brick */
+    function void drawBrick(int x, int y, int width, int height) {
+        do Screen.setColor(true);
+        do Screen.drawRectangle(x, y, x + width, y + height);
+        return;
+    }
+    
+    /** Displays text on screen */
+    function void displayText(String message, int x, int y) {
+        do Output.moveCursor(y, x);
+        do Output.printString(message);
+        return;
+    }
+} 
